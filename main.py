@@ -19,10 +19,25 @@ sp500["Target"] = (sp500["Tomorrow"] > sp500["Close"]).astype(int)
 
 sp500 = sp500.loc["1990-01-01":].copy()
 
-sp500
-
 from sklearn.ensemble import RandomForestClassifier 
 
 model = RandomForestClassifier(n_estimators=100, min_samples_split=100, random_state = 1)
 
-train = 
+train = sp500.iloc[:-100]
+test = sp500.iloc[-100:]
+
+predictors = ["Close", "Volume", "Open", "High", "Low"]
+model.fit(train[predictors], train["Target"])
+
+from sklearn.metrics import precision_score
+preds = model.predict(test[predictors])
+
+import pandas as pd
+preds = pd.Series(preds, index = test.index)
+precision_score(test["Target"], preds)
+
+combined = pd.concat([test["Target"], preds], axis=1)
+combined.plot()
+
+import matplotlib.pyplot as plt
+plt.show()
